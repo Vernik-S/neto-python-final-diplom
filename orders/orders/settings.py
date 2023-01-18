@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'rest_framework.authtoken',
+    'django_rest_passwordreset',
 
     'my_app',
 ]
@@ -128,3 +130,13 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'my_app.User'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_USE_TLS = True
+
+EMAIL_HOST = os.getenv("SMTP_SERVER", default="127.0.0.1")
+EMAIL_HOST_USER = 'netology-host@netology.ru'
+EMAIL_HOST_PASSWORD = '123'
+EMAIL_PORT = os.getenv("SMTP_PORT", default=3000)
+EMAIL_USE_SSL = False
+SERVER_EMAIL = EMAIL_HOST_USER
