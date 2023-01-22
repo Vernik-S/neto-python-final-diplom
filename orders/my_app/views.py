@@ -244,6 +244,7 @@ class BasketView(APIView):
     Класс для работы с корзиной пользователя
     """
 
+
     # получить корзину
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
