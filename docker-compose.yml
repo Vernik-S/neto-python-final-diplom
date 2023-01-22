@@ -68,9 +68,10 @@ services:
     volumes:
       - static:/code/static
       - media:/code/media
-      - nginx_conf:/etc/nginx/conf.d/
+      - nginx_conf:/etc/nginx/conf.d/:ro
 
     restart: always
+
 #  redis:
 #    image: redis:7.0.0-alpine3.15
 #    ports:
