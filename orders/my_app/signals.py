@@ -33,17 +33,21 @@ def password_reset_token_created(sender, instance, reset_password_token, **kwarg
     """
     # send an e-mail to the user
 
-    msg = EmailMultiAlternatives(
-        # title:
-        f"Password Reset Token for {reset_password_token.user}",
-        # message:
-        reset_password_token.key,
-        # from:
-        settings.EMAIL_HOST_USER,
-        # to:
-        [reset_password_token.user.email]
-    )
-    msg.send()
+    # msg = EmailMultiAlternatives(
+    #     # title:
+    #     f"Password Reset Token for {reset_password_token.user}",
+    #     # message:
+    #     reset_password_token.key,
+    #     # from:
+    #     settings.EMAIL_HOST_USER,
+    #     # to:
+    #     [reset_password_token.user.email]
+    # )
+    # msg.send()
+    send_mail.delay(title=f"Password Reset Token for {reset_password_token.user}", message=reset_password_token.key,
+              from_=settings.EMAIL_HOST_USER, to_=[reset_password_token.user.email])
+
+
 
 
 @receiver(new_user_registered)
@@ -77,14 +81,19 @@ def new_order_signal(user_id, **kwargs):
     # send an e-mail to the user
     user = User.objects.get(id=user_id)
 
-    msg = EmailMultiAlternatives(
-        # title:
-        f"Обновление статуса заказа",
-        # message:
-        'Заказ сформирован',
-        # from:
-        settings.EMAIL_HOST_USER,
-        # to:
-        [user.email]
-    )
-    msg.send()
+    # msg = EmailMultiAlternatives(
+    #     # title:
+    #     f"Обновление статуса заказа",
+    #     # message:
+    #     'Заказ сформирован',
+    #     # from:
+    #     settings.EMAIL_HOST_USER,
+    #     # to:
+    #     [user.email]
+    # )
+    # msg.send()
+
+    send_mail.delay(title=f"Обновление статуса заказа", message='Заказ сформирован',
+              from_=settings.EMAIL_HOST_USER, to_=[user.email])
+
+

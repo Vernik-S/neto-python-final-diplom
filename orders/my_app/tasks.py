@@ -15,3 +15,4 @@ def send_mail(title, message, from_, to_):
         to_
     )
     msg.send()
+
