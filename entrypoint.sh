@@ -8,6 +8,8 @@ python manage.py collectstatic --noinput
 echo "Apply database migrations"
 python manage.py migrate
 
+python manage.py import_shop
+
 # Start server
 echo "Starting server"
 gunicorn orders.wsgi -b 0.0.0.0:8080 
