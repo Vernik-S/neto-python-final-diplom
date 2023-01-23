@@ -41,12 +41,13 @@ services:
       PG_PORT: 5432
       SMTP_SERVER: smtp4dev
       SMTP_PORT: 25
+      REDIS_HOST: redis
     ports:
       - "8080:8080"
     depends_on:
       - db
       - smtp4dev
-      #- redis
+      - celery
 
 
     restart:
@@ -78,6 +79,24 @@ services:
       - "6379:6379"
     depends_on:
       - db
+
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    environment:
+      PG_USER: postgres
+      PG_PASSWORD: postpass
+      PG_NAME: orders_diploma
+      PG_HOST: db
+      PG_PORT: 5432
+      SMTP_SERVER: smtp4dev
+      SMTP_PORT: 25
+      REDIS_HOST: redis
+    depends_on:
+      - redis
+    command: celery worker --app=orders --loglevel=info
 #
 #  celery:
 #    build:

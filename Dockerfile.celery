@@ -1,0 +1,15 @@
+
+FROM python:3.8
+COPY ./orders /code
+#COPY requirements.txt /app/requirements.txt
+
+WORKDIR /code
+
+RUN pip install --no-cache-dir -r /code/requirements.txt
+
+
+
+COPY run_celery.sh /code/run_celery.sh
+
+RUN chmod +x /code/run_celery.sh
+ENTRYPOINT /code/run_celery.sh
