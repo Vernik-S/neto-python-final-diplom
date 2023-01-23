@@ -72,12 +72,12 @@ services:
 
     restart: always
 
-#  redis:
-#    image: redis:7.0.0-alpine3.15
-#    ports:
-#      - "6379:6379"
-#    depends_on:
-#      - db
+  redis:
+    image: redis:7.0.0-alpine3.15
+    ports:
+      - "6379:6379"
+    depends_on:
+      - db
 #
 #  celery:
 #    build:
