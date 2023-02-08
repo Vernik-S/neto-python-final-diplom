@@ -2,8 +2,8 @@ from django.urls import path, include
 from django_rest_passwordreset.views import reset_password_request_token, reset_password_confirm
 from rest_framework.routers import DefaultRouter
 
-from my_app.views import  RegisterAccount, ConfirmAccount, AccountDetails, \
-    ContactView, LoginAccount, CategoryView, ShopView, BasketView, OrderView, ProductInfoViewSet, PartnerViewSet
+from my_app.views import  CategoryView, ShopView, BasketView, OrderView, ProductInfoViewSet, PartnerViewSet, \
+    UserViewSet
 
 app_name = 'my_app'
 
@@ -13,6 +13,8 @@ router.register('products', ProductInfoViewSet, basename="products")
 
 router.register('partner', PartnerViewSet, basename="partner")
 
+router.register('user', UserViewSet, basename="user")
+
 
 
 
@@ -21,11 +23,11 @@ urlpatterns = [
     # path('partner/update', PartnerUpdate.as_view(), name='partner-update'),
     # path('partner/state', PartnerState.as_view(), name='partner-state'),
     # path('partner/orders', PartnerOrders.as_view(), name='partner-orders'),
-    path('user/register', RegisterAccount.as_view(), name='user-register'),
-    path('user/register/confirm', ConfirmAccount.as_view(), name='user-register-confirm'),
-    path('user/details', AccountDetails.as_view(), name='user-details'),
-    path('user/contact', ContactView.as_view(), name='user-contact'),
-    path('user/login', LoginAccount.as_view(), name='user-login'),
+    # path('user/register', RegisterAccount.as_view(), name='user-register'),
+    # path('user/register/confirm', ConfirmAccount.as_view(), name='user-register-confirm'),
+    # path('user/details', AccountDetails.as_view(), name='user-details'),
+    # path('user/contact', ContactView.as_view(), name='user-contact'),
+    # path('user/login', LoginAccount.as_view(), name='user-login'),
     path('user/password_reset', reset_password_request_token, name='password-reset'),
     path('user/password_reset/confirm', reset_password_confirm, name='password-reset-confirm'),
     path('categories', CategoryView.as_view(), name='categories'),
