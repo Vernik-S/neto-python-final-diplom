@@ -7,13 +7,14 @@ from django.db import IntegrityError
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
 from django.shortcuts import render
+from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core.exceptions import ValidationError
 from requests import get
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ViewSet, GenericViewSet
 from yaml import load as load_yaml, Loader
 from rest_framework.authtoken.models import Token
 
@@ -401,19 +402,33 @@ class UserViewSet(ViewSet):
 #
 #         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
-class CategoryView(ListAPIView):
+class CategoryViewSet(mixins.ListModelMixin, GenericViewSet):
     """
     Класс для просмотра категорий
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-class ShopView(ListAPIView):
+# class CategoryView(ListAPIView):
+#     """
+#     Класс для просмотра категорий
+#     """
+#     queryset = Category.objects.all()
+#     serializer_class = CategorySerializer
+
+class ShopViewSet(mixins.ListModelMixin, GenericViewSet):
     """
     Класс для просмотра списка магазинов
     """
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
+
+# class ShopView(ListAPIView):
+#     """
+#     Класс для просмотра списка магазинов
+#     """
+#     queryset = Shop.objects.filter(state=True)
+#     serializer_class = ShopSerializer
 
 # class ProductInfoView(APIView):
 #     """
