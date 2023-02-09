@@ -87,7 +87,7 @@ class UserViewSet(ViewSet):
     """
     Класс для работы с ползьователями
     """
-
+    serializer_class = UserSerializer
     @action(detail=False, methods=['post'])
     def register(self, request):
         """
@@ -472,7 +472,7 @@ class ProductInfoViewSet(ViewSet):
     """
     Класс для поиска товаров
     """
-
+    serializer_class = ProductInfoSerializer
     def list(self, request, *args, **kwargs):
 
         query = Q(shop__state=True)
@@ -499,6 +499,7 @@ class BasketViewSet(ViewSet):
     """
     Класс для работы с корзиной пользователя
     """
+    serializer_class = OrderSerializer
     @action(detail=False, methods=['get'])
     def basket(self, request):
     # получить корзину
@@ -690,7 +691,7 @@ class PartnerViewSet(ViewSet):
     """
     Класс для работы с магазинами
     """
-
+    serializer_class = ShopSerializer
     @action(detail=False, methods=['post'])
     def update_partner(self, request):
         """Получение прайса из переданного url"""
@@ -973,6 +974,7 @@ class OrderViewSet(ViewSet):
     """
     Класс для получения и размешения заказов пользователями
     """
+    serializer_class = OrderSerializer
     @action(detail=False, methods=['get'])
     def order(self, request):
         """получить мои заказы"""
