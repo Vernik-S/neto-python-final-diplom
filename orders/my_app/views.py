@@ -34,6 +34,9 @@ class PartnerUpdate(APIView):
     Класс для обновления прайса от поставщика
     """
     def post(self, request, *args, **kwargs):
+        """
+        Создание прайса по входному url
+        """
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
@@ -81,10 +84,17 @@ class PartnerUpdate(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 class UserViewSet(ViewSet):
+    """
+    Класс для работы с ползьователями
+    """
 
     @action(detail=False, methods=['post'])
     def register(self, request):
-        # Регистрация методом POST
+        """
+        Регистрация польователя методом POST
+
+        На вход нужны 'first_name', 'last_name', 'email', 'password', 'company', 'position'
+        """
 
         # проверяем обязательные аргументы
         if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
@@ -119,9 +129,9 @@ class UserViewSet(ViewSet):
 
     @action(detail=False, methods=['post'], url_path='register/confirm')
     def confirm(self, request):
-        #     """
-        #     Класс для подтверждения почтового адреса
-        #     """
+        """
+        Функция для подтверждения почтового адреса по токену
+        """
         #
         #     # Регистрация методом POST
         # проверяем обязательные аргументы
@@ -142,7 +152,7 @@ class UserViewSet(ViewSet):
     @action(detail=False)
     def details(self, request):
         """
-        Класс для работы данными пользователя
+        Функция для получения детальных данных пользователя
         """
 
         # получить данные
@@ -154,7 +164,7 @@ class UserViewSet(ViewSet):
 
     @details.mapping.post
     def post_details(self, request):
-        # Редактирование методом POST
+        """Редактирование детальных данных  методом POST"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
         # проверяем обязательные аргументы
@@ -184,7 +194,7 @@ class UserViewSet(ViewSet):
     @action(detail=False)
     def contact(self,  request):
         """
-        Класс для работы с контактами покупателей
+        Функция для получения своих контактов для залогированных
         """
 
         # получить мои контакты
@@ -198,7 +208,7 @@ class UserViewSet(ViewSet):
 
     @contact.mapping.post
     def add_contact(self, request):
-        # добавить новый контакт
+        """ добавить новый контакт к залогированному польователю"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
@@ -217,7 +227,7 @@ class UserViewSet(ViewSet):
 
     @contact.mapping.delete
     def del_contact(self, request):
-        # удалить контакт
+        """удалить контакты по id в поле items"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
@@ -238,7 +248,7 @@ class UserViewSet(ViewSet):
 
     @contact.mapping.put
     def edit_contact(self, request):
-        # редактировать контакт
+        """редактировать контакт по полю id"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
@@ -259,7 +269,7 @@ class UserViewSet(ViewSet):
     @action(detail=False, methods=['post'])
     def login(self, request):
         """
-        Класс для авторизации пользователей
+        Класс для авторизации пользователей по email и password
         """
 
         # Авторизация методом POST
@@ -677,10 +687,13 @@ class BasketViewSet(ViewSet):
 #         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 class PartnerViewSet(ViewSet):
+    """
+    Класс для работы с магазинами
+    """
 
     @action(detail=False, methods=['post'])
     def update_partner(self, request):
-
+        """Получение прайса из переданного url"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
@@ -729,11 +742,12 @@ class PartnerViewSet(ViewSet):
 
     @action(detail=False, url_path="state", methods=['get'])
     def status(self, request, *args, **kwargs):
+        """Получение статусов магазинов для залогиненного пользователя"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
         if request.user.type != 'shop':
-            return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
+            return JsonResponse({'Status': False, 'Error': 'Только для магазинов',}, status=403)
 
         shop = request.user.shop
         serializer = ShopSerializer(shop)
@@ -744,6 +758,7 @@ class PartnerViewSet(ViewSet):
     #изменить текущий статус
     @status.mapping.post
     def change_partner_status(self, request, *args, **kwargs):
+        """Обновление статуса магазина по переданному state"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
@@ -761,6 +776,7 @@ class PartnerViewSet(ViewSet):
 
     @action(detail=False)
     def orders(self, request):
+        """Получение своих заказов кроме статуса basket"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
@@ -959,7 +975,7 @@ class OrderViewSet(ViewSet):
     """
     @action(detail=False, methods=['get'])
     def order(self, request):
-        # получить мои заказы
+        """получить мои заказы"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
         order = Order.objects.filter(
@@ -973,7 +989,7 @@ class OrderViewSet(ViewSet):
 
     @order.mapping.post
     def post_order(self, request):
-        # разместить заказ из корзины
+        """разместить заказ из корзины по id заказа и id контакта"""
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
