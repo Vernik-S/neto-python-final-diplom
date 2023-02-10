@@ -24,6 +24,7 @@ swagger_patterns = [
     # Optional UI:
     path('schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
 ]
 
 
@@ -31,6 +32,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('my_app.urls', namespace='my_app')),
     path('api/v1/', include(swagger_patterns)),
+    # path('auth/', include('rest_auth.urls')),
+    path('accounts/', include('allauth.urls')),  # new
 
 
 ]
