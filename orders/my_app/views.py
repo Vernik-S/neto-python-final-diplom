@@ -1,5 +1,10 @@
+import urllib
 from distutils.util import strtobool
 
+from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from allauth.utils import build_absolute_uri
+from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
@@ -7,8 +12,9 @@ from django.db import IntegrityError
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.urls import reverse
 from rest_framework import mixins
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -1053,3 +1059,25 @@ class OrderViewSet(ViewSet):
 #
 #         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
+
+class GitHubLogin(SocialLoginView):
+    adapter_class = GitHubOAuth2Adapter
+    client_class = OAuth2Client
+    def  post(self, request, *args, **kwargs):
+
+        response = super(GitHubLogin, self).post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['key'])
+        return Response({'token': token.key, 'id': token.user_id})
+
+@api_view(['GET'])
+def CodeView(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        code = urllib.parse.unquote(request.query_params['code'])
+        return Response({
+        	"code":code,
+            'get_token':build_absolute_uri(request, reverse('get-token'))
+
+        	})
