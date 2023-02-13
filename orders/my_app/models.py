@@ -35,6 +35,11 @@ class UserManager(BaseUserManager):
         """
         Create and save a user with the given username, email, and password.
         """
+
+        # if auth_from_social:
+        #     extra_fields["is_active"] = True
+
+
         if not email:
             raise ValueError('The given email must be set')
         email = self.normalize_email(email)

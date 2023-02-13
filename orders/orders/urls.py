@@ -16,6 +16,7 @@ Including another URLconf
 from allauth.socialaccount.providers.github.views import oauth2_login, oauth2_callback
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 from my_app.views import GitHubLogin, GoogleLogin
@@ -39,7 +40,7 @@ urlpatterns = [
     # path('rest-auth/github/', GitHubLogin.as_view(),     name='redirect'),
     # path('api/v1/code', CodeView, name='code'),
     # path('auth/get_token/',  GitHubLogin.as_view(), name='get-token'),
-    # path('', oauth2_login),
+    # path('', RedirectView.as_view(url="accounts/login/")),
 
     path('auth/github/login/callback/', GitHubLogin.as_view(), name='github_callback'),
     path('auth/google/login/callback/', GoogleLogin.as_view(), name='google_callback'),
