@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-from my_app.views import GitHubLogin, CodeView
+from my_app.views import GitHubLogin, GoogleLogin
 
 swagger_patterns = [
     # YOUR PATTERNS
@@ -42,6 +42,7 @@ urlpatterns = [
     # path('', oauth2_login),
 
     path('auth/github/login/callback/', GitHubLogin.as_view(), name='github_callback'),
+    path('auth/google/login/callback/', GoogleLogin.as_view(), name='google_callback'),
 
     # path('auth/github/callback/', oauth2_callback, name='github_callback'),
 

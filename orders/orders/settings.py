@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
+    'allauth.socialaccount.providers.google',
     'dj_rest_auth',
 
 
@@ -59,10 +60,11 @@ SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
 
 # Additional configuration settings
-# ACCOUNT_AUTHENTICATION_METHOD = 'email'
-# ACCOUNT_EMAIL_REQUIRED = True
-# ACCOUNT_UNIQUE_EMAIL = True
-# ACCOUNT_USERNAME_REQUIRED = False
+SOCIALACCOUNT_QUERY_EMAIL = True
+ACCOUNT_LOGOUT_ON_GET= True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_REQUIRED = True
+
 
 SOCIALACCOUNT_STORE_TOKENS =  True
 
@@ -77,6 +79,20 @@ SOCIALACCOUNT_PROVIDERS = {
             'key': ''
         }
 
+    },
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'APP': {
+            'client_id': '1027175231988-ie6bbv887h94b3coh5de6lscaf35elg2.apps.googleusercontent.com',
+            'secret': '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',
+            'key': ''
+        }
     }
 }
 
@@ -185,7 +201,7 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '10/day',
+        'anon': '1000/day',
         'user': '1000/day'
     },
 
