@@ -71,6 +71,12 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': [
             'user:email',
         ],
+        'APP': {
+            'client_id': 'a751e5414ae5fe4a5b8c',
+            'secret': '75327d7f1014a2b2725329e42215be49fbdfd7db',
+            'key': ''
+        }
+
     }
 }
 
