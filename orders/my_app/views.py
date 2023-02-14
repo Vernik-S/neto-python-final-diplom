@@ -1,6 +1,8 @@
 import urllib.parse
 from distutils.util import strtobool
 
+import rest_framework.fields
+
 
 from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -13,12 +15,14 @@ from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
-from django.shortcuts import render
-from django.urls import reverse
+
+
+
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from rest_framework import mixins
 from rest_framework.decorators import action, api_view
-from rest_framework.generics import ListAPIView
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core.exceptions import ValidationError
@@ -28,7 +32,7 @@ from yaml import load as load_yaml, Loader
 from rest_framework.authtoken.models import Token
 
 from my_app.models import Shop, Category, ProductInfo, Product, Parameter, ProductParameter, ConfirmEmailToken, Order, \
-    OrderItem, Contact
+    OrderItem, Contact, User
 from my_app.serializers import UserSerializer, ShopSerializer, CategorySerializer, ProductInfoSerializer, \
     OrderSerializer, OrderItemSerializer, ContactSerializer
 from my_app.signals import new_user_registered, new_order
@@ -97,6 +101,17 @@ class UserViewSet(ViewSet):
     Класс для работы с ползьователями
     """
     serializer_class = UserSerializer
+
+    user_serialier_fields = dict(UserSerializer().get_fields())
+    user_serialier_fields.update({"password":rest_framework.fields.CharField()})
+
+
+    @extend_schema(
+        # parameters=[UserSerializer],
+        request=inline_serializer(name="UserInline", fields=user_serialier_fields)
+
+    )
+    # @extend_schema_serializer()
     @action(detail=False, methods=['post'])
     def register(self, request):
         """
