@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.google',
     'dj_rest_auth',
+    'django_extensions',
 
 
 
@@ -225,6 +226,9 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+    "TEST_REQUEST_DEFAULT_FORMAT": 'json',
+
 
 }
 

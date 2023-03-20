@@ -14,9 +14,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.db.models import Q, Sum, F
-from django.http import JsonResponse
-
-
+from django.http import JsonResponse, QueryDict
 
 from drf_spectacular.utils import extend_schema, inline_serializer
 
@@ -135,8 +133,11 @@ class UserViewSet(ViewSet):
                     error_array.append(item)
                 return JsonResponse({'Status': False, 'Errors': {'password': error_array}})
             else:
+                if isinstance(request.data, QueryDict): # при тестировании ApiClient присылает dict, у него нет _mutable
+                    request.data._mutable = True
+
                 # проверяем данные для уникальности имени пользователя
-                request.data._mutable = True
+
                 request.data.update({})
                 user_serializer = UserSerializer(data=request.data)
                 if user_serializer.is_valid():
