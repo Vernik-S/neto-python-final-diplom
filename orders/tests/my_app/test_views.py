@@ -46,23 +46,39 @@ def test_user_register(client):
 
     assert email_token
 
+
 @pytest.fixture()
 def test_password():
     return "Q1W2E3aaa"
-@pytest.fixture()
-# @pytest.db
-def test_user(test_password):
 
+
+@pytest.fixture()
+def test_details():
     test_data = {
         "first_name": "TName",
         "last_name": "TSurname",
         "email": "Test20@aaa.aa",
         "company": "TCompany",
-        #"password": "Q1W2E3aaa",
+        # "password": "Q1W2E3aaa",
         "position": "Tposition"
     }
 
-    user = User.objects.get_or_create(**test_data)[0]
+    return test_data
+
+
+@pytest.fixture()
+# @pytest.db
+def test_user(test_password, test_details):
+    # test_data = {
+    #     "first_name": "TName",
+    #     "last_name": "TSurname",
+    #     "email": "Test20@aaa.aa",
+    #     "company": "TCompany",
+    #     #"password": "Q1W2E3aaa",
+    #     "position": "Tposition"
+    # }
+
+    user = User.objects.get_or_create(**test_details)[0]
 
     user.set_password(test_password)
     user.save()
@@ -98,7 +114,7 @@ def test_user_active(test_user):
     test_user.is_active = True
     test_user.save()
 
-    #all_users = User.objects.all().first()
+    # all_users = User.objects.all().first()
 
     return test_user
 
@@ -106,7 +122,6 @@ def test_user_active(test_user):
 @pytest.mark.django_db
 def test_user_login(client, test_user_active, test_password):
     # Arrange
-
 
     test_data = {
         "email": test_user_active.email,
@@ -126,3 +141,27 @@ def test_user_login(client, test_user_active, test_password):
     test_user_token = Token.objects.get(user=test_user_active)
 
     assert received_token == test_user_token.key
+
+
+@pytest.fixture
+def auth_token(test_user_active):
+    return Token.objects.get_or_create(user=test_user_active)[0]
+
+
+@pytest.mark.django_db
+def test_user_get_details(client, auth_token, test_details, test_user_active):
+    # Arrange
+    # client.credentials(**{'Authorization': f'Token {auth_token.key}'})
+    client.force_login(test_user_active)
+    aaa = 'Token ' + auth_token.key
+    client.credentials(HTTP_AUTHORIZATION='Token ' + auth_token.key)
+
+    # Act
+    response = client.get(reverse("my_app:user-details"), follow=True,
+                          content_type="application/json",) # HTTP_Authorization=f'Token {auth_token.key}')
+    data = response.json()
+
+    # Assert
+    assert response.status_code == 200
+    for key in test_details.keys():
+        assert test_details[key] == data[key]
