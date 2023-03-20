@@ -1,4 +1,5 @@
 import pytest
+from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 import json
@@ -6,11 +7,6 @@ from django.http import QueryDict
 
 from my_app.models import ConfirmEmailToken, User
 from requests_toolbelt.multipart.encoder import MultipartEncoder
-
-
-def test_test():
-    print(17)
-    assert 2 == 2
 
 
 @pytest.fixture
@@ -25,18 +21,13 @@ def test_user_register(client):
     data = {
         "first_name": "TName",
         "last_name": "TSurname",
-        "email": "Test15@aaa.aa",
+        "email": test_email,
         "company": "TCompany",
         "password": "Q1W2E3aaa",
         "position": "Tposition"
     }
 
-    data_multi = MultipartEncoder(
-        fields=data)
-
-    query_dict = QueryDict('', mutable=True)
-    query_dict.update(data)
-    json_data = json.dumps(query_dict)
+    json_data = json.dumps(data)
 
     # Act
     response = client.post(reverse("my_app:user-register"), data=json_data, follow=True,
@@ -54,3 +45,84 @@ def test_user_register(client):
         email_token = None
 
     assert email_token
+
+@pytest.fixture()
+def test_password():
+    return "Q1W2E3aaa"
+@pytest.fixture()
+# @pytest.db
+def test_user(test_password):
+
+    test_data = {
+        "first_name": "TName",
+        "last_name": "TSurname",
+        "email": "Test20@aaa.aa",
+        "company": "TCompany",
+        #"password": "Q1W2E3aaa",
+        "position": "Tposition"
+    }
+
+    user = User.objects.get_or_create(**test_data)[0]
+
+    user.set_password(test_password)
+    user.save()
+    return user
+
+
+@pytest.mark.django_db
+def test_user_confirm(client, test_user):
+    # Arrange
+    confirm_token, _ = ConfirmEmailToken.objects.get_or_create(user_id=test_user.id)
+    email = test_user.email
+
+    test_data = {
+        "email": email,
+        "token": confirm_token.key
+    }
+
+    # Act
+    response = client.post(reverse("my_app:user-confirm"), data=json.dumps(test_data), follow=True,
+                           content_type="application/json")
+    data = response.json()
+    test_user.refresh_from_db()
+
+    # Assert
+    assert data == {"Status": True}
+    assert response.status_code == 200
+    assert test_user.is_active
+
+
+@pytest.fixture()
+# @pytest.db
+def test_user_active(test_user):
+    test_user.is_active = True
+    test_user.save()
+
+    #all_users = User.objects.all().first()
+
+    return test_user
+
+
+@pytest.mark.django_db
+def test_user_login(client, test_user_active, test_password):
+    # Arrange
+
+
+    test_data = {
+        "email": test_user_active.email,
+        "password": test_password
+    }
+
+    # Act
+    response = client.post(reverse("my_app:user-login"), data=json.dumps(test_data), follow=True,
+                           content_type="application/json")
+    data = response.json()
+
+    # Assert
+    assert response.status_code == 200
+    assert data.get("Status") is True
+
+    received_token = data.get("Token")
+    test_user_token = Token.objects.get(user=test_user_active)
+
+    assert received_token == test_user_token.key
