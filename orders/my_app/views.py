@@ -238,7 +238,9 @@ class UserViewSet(ViewSet):
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
         if {'city', 'street', 'phone'}.issubset(request.data):
-            request.data._mutable = True
+            if isinstance(request.data, QueryDict):  # при тестировании ApiClient присылает dict, у него нет _mutable
+                request.data._mutable = True
+            #request.data._mutable = True
             request.data.update({'user': request.user.id})
             serializer = ContactSerializer(data=request.data)
 

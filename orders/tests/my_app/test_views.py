@@ -5,8 +5,9 @@ from rest_framework.test import APIClient
 import json
 from django.http import QueryDict
 
-from my_app.models import ConfirmEmailToken, User
+from my_app.models import ConfirmEmailToken, User, Contact
 from requests_toolbelt.multipart.encoder import MultipartEncoder
+from model_bakery import baker
 
 
 @pytest.fixture
@@ -148,20 +149,62 @@ def auth_token(test_user_active):
     return Token.objects.get_or_create(user=test_user_active)[0]
 
 
-@pytest.mark.django_db
-def test_user_get_details(client, auth_token, test_details, test_user_active):
-    # Arrange
-    # client.credentials(**{'Authorization': f'Token {auth_token.key}'})
+@pytest.fixture
+def authorized_client(client, auth_token, test_user_active):
     client.force_login(test_user_active)
-    aaa = 'Token ' + auth_token.key
     client.credentials(HTTP_AUTHORIZATION='Token ' + auth_token.key)
 
+    return client
+
+
+@pytest.mark.django_db
+def test_user_get_details(client, auth_token, test_details, test_user_active, authorized_client):
+    # Arrange
+    # client.credentials(**{'Authorization': f'Token {auth_token.key}'})
+    # client.force_login(test_user_active)
+    # client.credentials(HTTP_AUTHORIZATION='Token ' + auth_token.key)
+
     # Act
-    response = client.get(reverse("my_app:user-details"), follow=True,
-                          content_type="application/json",) # HTTP_Authorization=f'Token {auth_token.key}')
+    response = authorized_client.get(reverse("my_app:user-details"), follow=True,
+                                     content_type="application/json", )  # HTTP_Authorization=f'Token {auth_token.key}')
     data = response.json()
 
     # Assert
     assert response.status_code == 200
     for key in test_details.keys():
         assert test_details[key] == data[key]
+
+
+@pytest.fixture
+def contact_factory():
+    def factory(*args, **kwargs):
+        return baker.make(Contact, *args, **kwargs)
+
+    return factory
+
+
+@pytest.mark.django_db
+def test_user_add_contact(test_details, test_user_active, contact_factory, authorized_client):
+    # Arrange
+
+    test_contact = contact_factory(_quantity=1, user_id=test_user_active.id)[0]
+
+    test_data = {
+        "city":test_contact.city,
+        "street":test_contact.street,
+        "phone":test_contact.phone}
+
+    #Act
+    response = authorized_client.post(reverse("my_app:user-contact"), follow=True,
+                                     content_type="application/json", data=json.dumps(test_data))
+    data = response.json()
+
+    # Assert
+    assert response.status_code == 200
+    assert data.get("Status") is True
+    test_user_active.refresh_from_db()
+    contacts = test_user_active.contacts.all()
+    contact = contacts.latest("id")
+    for key in test_data.keys():
+        assert test_data[key] == getattr(contact, key)
+
