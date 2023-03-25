@@ -174,24 +174,20 @@ def test_user_get_details(client, auth_token, test_details, test_user_active, au
     for key in test_details.keys():
         assert test_details[key] == data[key]
 
-
 @pytest.fixture
-def contact_factory():
-    def factory(*args, **kwargs):
-        return baker.make(Contact, *args, **kwargs)
-
-    return factory
-
+def contact_fields():
+    contact_fields = [field.attname for field in Contact._meta.fields if field.attname not in ("id", "user_id")]
+    return  contact_fields
 
 @pytest.mark.django_db
-def test_user_add_contact(test_user_active, authorized_client):
+def test_user_add_contact(test_user_active, authorized_client, contact_fields):
     # Arrange
     test_contact = baker.prepare(Contact, _fill_optional=True)
     # test_contact = contact_factory(_quantity=1, user_id=test_user_active.id)[0]
 
     # contact_fields = ( 'city', 'street', 'house', 'structure', 'building', 'apartment', 'phone')
 
-    contact_fields = [field.attname for field in Contact._meta.fields if field.attname not in ("id", "user_id")]
+    #contact_fields = [field.attname for field in Contact._meta.fields if field.attname not in ("id", "user_id")]
 
     # test_data = {
     #     "city":test_contact.city,
@@ -214,3 +210,31 @@ def test_user_add_contact(test_user_active, authorized_client):
     # contact = contacts.latest("id")
     for key in test_data.keys():
         assert test_data[key] == getattr(contact, key)
+
+
+@pytest.fixture
+def contact_factory():
+    def factory(*args, **kwargs):
+        return baker.make(Contact, *args, **kwargs)
+
+    return factory
+
+
+@pytest.mark.django_db
+def test_user_get_contact(test_user_active, authorized_client, contact_factory, contact_fields):
+    #Arrange
+    test_contacts = contact_factory(_quantity=10, user_id=test_user_active.id, _fill_optional=True)
+
+    #Act
+    response = authorized_client.get(reverse("my_app:user-contact"), follow=True,
+                                      content_type="application/json",)
+    data = response.json()
+
+    # Assert
+
+
+    assert response.status_code == 200
+    for i, response_contact in enumerate(data):
+        for field in contact_fields:
+            assert response_contact[field] == getattr(test_contacts[i], field)
+
