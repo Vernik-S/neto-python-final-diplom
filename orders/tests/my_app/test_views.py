@@ -184,27 +184,33 @@ def contact_factory():
 
 
 @pytest.mark.django_db
-def test_user_add_contact(test_details, test_user_active, contact_factory, authorized_client):
+def test_user_add_contact(test_user_active, authorized_client):
     # Arrange
+    test_contact = baker.prepare(Contact, _fill_optional=True)
+    # test_contact = contact_factory(_quantity=1, user_id=test_user_active.id)[0]
 
-    test_contact = contact_factory(_quantity=1, user_id=test_user_active.id)[0]
+    # contact_fields = ( 'city', 'street', 'house', 'structure', 'building', 'apartment', 'phone')
 
-    test_data = {
-        "city":test_contact.city,
-        "street":test_contact.street,
-        "phone":test_contact.phone}
+    contact_fields = [field.attname for field in Contact._meta.fields if field.attname not in ("id", "user_id")]
 
-    #Act
+    # test_data = {
+    #     "city":test_contact.city,
+    #     "street":test_contact.street,
+    #     "phone":test_contact.phone}
+
+    test_data = {field: getattr(test_contact, field) for field in contact_fields}
+
+    # Act
     response = authorized_client.post(reverse("my_app:user-contact"), follow=True,
-                                     content_type="application/json", data=json.dumps(test_data))
+                                      content_type="application/json", data=json.dumps(test_data))
     data = response.json()
 
     # Assert
     assert response.status_code == 200
     assert data.get("Status") is True
     test_user_active.refresh_from_db()
-    contacts = test_user_active.contacts.all()
-    contact = contacts.latest("id")
+    contact = test_user_active.contacts.all()[0]
+    # contacts = test_user_active.contacts.all()
+    # contact = contacts.latest("id")
     for key in test_data.keys():
         assert test_data[key] == getattr(contact, key)
-
