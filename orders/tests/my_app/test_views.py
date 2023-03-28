@@ -1,3 +1,5 @@
+import random
+
 import pytest
 from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
@@ -259,5 +261,38 @@ def test_user_delete_contact(test_user_active, authorized_client, contact_factor
 
 
     assert response.status_code == 200
+    assert data["Status"] is True
+    assert data["Удалено объектов"] == len(items)
     assert len(test_user_active.contacts.all()) == 0
 
+@pytest.mark.django_db
+def test_user_edit_contact(test_user_active, authorized_client, contact_factory, contact_fields):
+    #Arrange
+    test_contacts = contact_factory(_quantity=10, user_id=test_user_active.id, _fill_optional=True)
+    items = [str(contact.id) for contact in test_contacts]
+
+    test_contact = baker.prepare(Contact, _fill_optional=True)
+
+    test_contact_data = {field: getattr(test_contact, field) for field in contact_fields}
+
+    test_contact_id= random.choice(items)
+
+    test_contact_data.update({"id": test_contact_id})
+
+
+
+    #Act
+    response = authorized_client.put(reverse("my_app:user-contact"), follow=True,
+                                      content_type="application/json", data=json.dumps(test_contact_data))
+    data = response.json()
+
+    # Assert
+
+
+    assert response.status_code == 200
+    assert data["Status"] is True
+    test_user_active.refresh_from_db()
+    contact = Contact.objects.filter(id=test_contact_id).first()
+    for key in test_contact_data.keys():
+        if key is not "id":
+            assert test_contact_data[key] == getattr(contact, key)
