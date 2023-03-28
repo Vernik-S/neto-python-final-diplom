@@ -238,3 +238,26 @@ def test_user_get_contact(test_user_active, authorized_client, contact_factory, 
         for field in contact_fields:
             assert response_contact[field] == getattr(test_contacts[i], field)
 
+
+@pytest.mark.django_db
+def test_user_delete_contact(test_user_active, authorized_client, contact_factory, contact_fields):
+    #Arrange
+    test_contacts = contact_factory(_quantity=10, user_id=test_user_active.id, _fill_optional=True)
+    items = [str(contact.id) for contact in test_contacts]
+
+    test_data = {
+        "items": ",".join(items)
+    }
+
+
+    #Act
+    response = authorized_client.delete(reverse("my_app:user-contact"), follow=True,
+                                      content_type="application/json", data=json.dumps(test_data))
+    data = response.json()
+
+    # Assert
+
+
+    assert response.status_code == 200
+    assert len(test_user_active.contacts.all()) == 0
+
