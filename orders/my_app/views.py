@@ -211,10 +211,22 @@ class UserViewSet(ViewSet):
         # проверяем остальные данные
         user_serializer = UserSerializer(request.user, data=request.data, partial=True)
         if user_serializer.is_valid():
+
+
             user_serializer.save()
+
+            contacts = request.data["contacts"]
+            for contact in contacts:
+                contact_object, _ = Contact.objects.update_or_create(user=request.user, **contact)
+                # request.user.contacts.add(contact_object)
+                # request.user.save()
+
+
             return JsonResponse({'Status': True})
         else:
             return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
+
+
 
     @action(detail=False)
     def contact(self,  request):

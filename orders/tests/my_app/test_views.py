@@ -11,6 +11,8 @@ from my_app.models import ConfirmEmailToken, User, Contact
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from model_bakery import baker
 
+from my_app.serializers import UserSerializer
+
 
 @pytest.fixture
 def client():
@@ -296,3 +298,55 @@ def test_user_edit_contact(test_user_active, authorized_client, contact_factory,
     for key in test_contact_data.keys():
         if key is not "id":
             assert test_contact_data[key] == getattr(contact, key)
+
+
+@pytest.fixture
+def user_fields():
+    user_fields = [field for field in UserSerializer.Meta.fields if field not in UserSerializer.Meta.read_only_fields if field != "contacts"]
+    return  user_fields
+
+@pytest.fixture
+def contact_factory_prepare():
+    def factory(*args, **kwargs):
+        return baker.prepare(Contact, *args, **kwargs)
+
+    return factory
+@pytest.mark.django_db
+def test_user_edit_details(test_user_active, authorized_client, contact_factory_prepare, contact_fields, user_fields):
+    #Arrange
+    test_details = baker.prepare(User, _fill_optional=True)
+
+    test_details = {field: getattr(test_details, field) for field in user_fields}
+
+    test_contacts=    contact_factory_prepare(_quantity=5, user_id=test_user_active.id, _fill_optional=True)
+
+    contacts_list = []
+    for contact in test_contacts:
+        contact_dict = {field: getattr(contact, field) for field in contact_fields}
+        contacts_list.append(contact_dict)
+
+    test_details.update({
+        "contacts" : contacts_list
+    })
+
+
+
+    #Act
+    response = authorized_client.post(reverse("my_app:user-details"), follow=True,
+                                      content_type="application/json", data=json.dumps(test_details))
+    data = response.json()
+
+    # Assert
+
+
+    assert response.status_code == 200
+    assert data["Status"] is True
+    test_user_active.refresh_from_db()
+    for key in test_details.keys():
+        if key != "contacts":
+            assert test_details[key] == getattr(test_user_active, key)
+        else:
+            user_contacts = test_user_active.contacts.all()
+            for i, contact in enumerate(contacts_list):
+                for key in contact.keys():
+                    assert contact[key] == getattr(user_contacts[i], key)
