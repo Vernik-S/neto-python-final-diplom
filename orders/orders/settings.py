@@ -71,6 +71,10 @@ ACCOUNT_EMAIL_REQUIRED = True
 
 SOCIALACCOUNT_STORE_TOKENS =  True
 
+SOCIALACCOUNT_ADAPTER = "orders.adapter.ActiveUserAdapter"
+ACCOUNT_EMAIL_VERIFICATION = "none"
+CSRF_TRUSTED_ORIGINS =["http://127.0.0.1", "http://*"]
+
 SOCIALACCOUNT_PROVIDERS = {
     'github': {
         'SCOPE': [
