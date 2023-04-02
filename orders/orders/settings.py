@@ -58,7 +58,7 @@ INSTALLED_APPS = [
 ]
 
 SITE_ID = 1
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/accounts/login/'
 
 # Additional configuration settings
 SOCIALACCOUNT_QUERY_EMAIL = True
@@ -73,7 +73,7 @@ SOCIALACCOUNT_STORE_TOKENS =  True
 
 SOCIALACCOUNT_ADAPTER = "orders.adapter.ActiveUserAdapter"
 ACCOUNT_EMAIL_VERIFICATION = "none"
-CSRF_TRUSTED_ORIGINS =["http://127.0.0.1", "http://*"]
+CSRF_TRUSTED_ORIGINS =["http://127.0.0.1:81"]
 
 SOCIALACCOUNT_PROVIDERS = {
     'github': {
